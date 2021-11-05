@@ -29,6 +29,8 @@ CREATE OR REPLACE FUNCTION sfz_adcode(id TEXT) RETURNS INTEGER RETURNS NULL ON N
 AS $$ SELECT substr(id, 1, 6)::INTEGER; $$ LANGUAGE sql IMMUTABLE;
 COMMENT ON FUNCTION sfz_adcode(id text) IS '提取6位地区代码，输入18/15位字符身份证号，返回6位整数区划代码';
 
+
+
 -- 提取前中间8位出生日期（一代证返回补足19前缀的完整日期）
 CREATE OR REPLACE FUNCTION sfz_birthday(id TEXT) RETURNS DATE RETURNS NULL ON NULL INPUT
 AS $$ BEGIN
@@ -40,11 +42,15 @@ AS $$ BEGIN
 END; $$ LANGUAGE PlPgSQL IMMUTABLE;
 COMMENT ON FUNCTION sfz_birthday(id text) IS '提取8位出生日期，输入18/15位字符身份证号，返回出生日期，非法日期返回空';
 
+
+
 -- 提取尾部3位序号
 CREATE OR REPLACE FUNCTION sfz_sequence(id TEXT) RETURNS VARCHAR(3) RETURNS NULL ON NULL INPUT
 AS $$ SELECT CASE length(id) WHEN 18 THEN substr(id, 15, 3) WHEN 15 THEN substr(id, 13, 3) END;
 $$ LANGUAGE sql IMMUTABLE;
 COMMENT ON FUNCTION sfz_sequence(id text) IS '提取3位序列号，输入18/15位字符身份证号，返回3位序列号字符';
+
+
 
 -- 提取性别：是否为男性
 CREATE OR REPLACE FUNCTION sfz_is_male(id TEXT) RETURNS BOOLEAN RETURNS NULL ON NULL INPUT
@@ -52,11 +58,15 @@ AS $$ SELECT (sfz_sequence(id)::INTEGER % 2)::BOOLEAN;
 $$ LANGUAGE sql IMMUTABLE;
 COMMENT ON FUNCTION sfz_is_male(id text) IS '输入18/15位字符身份证号，返回是否代表男性';
 
+
+
 -- 提取性别：是否为女性
 CREATE OR REPLACE FUNCTION sfz_is_female(id TEXT) RETURNS BOOLEAN RETURNS NULL ON NULL INPUT
 AS $$ SELECT NOT (sfz_sequence(id)::INTEGER % 2)::BOOLEAN;
 $$ LANGUAGE sql IMMUTABLE;
 COMMENT ON FUNCTION sfz_is_female(id text) IS '输入18/15位字符身份证号，返回是否代表女性';
+
+
 
 -- 提取校验和：最后一位（一代证返回空）
 CREATE OR REPLACE FUNCTION sfz_checksum(id TEXT) RETURNS VARCHAR(1) RETURNS NULL ON NULL INPUT
@@ -84,8 +94,9 @@ BEGIN
     RETURN t_lookup[(mod(sum, 11) + 1)];
 END;
 $$ LANGUAGE PlPgSQL IMMUTABLE;
-
 COMMENT ON FUNCTION sfz_calculate_checksum(id text) IS '身份证号校验和，输入为17/18位身份证号，计算得到最后一位校验和';
+
+
 
 -- 校验是否为合法二代身份证
 CREATE OR REPLACE FUNCTION sfz_valid_v2(id TEXT) RETURNS BOOLEAN RETURNS NULL ON NULL INPUT
@@ -98,8 +109,9 @@ BEGIN
     RETURN TRUE;
 END;
 $$ LANGUAGE PlPgSQL IMMUTABLE;
-
 COMMENT ON FUNCTION sfz_valid_v2(id text) IS '检查是否为合法18位二代身份证号：长度，日期，校验和。地区码暂不检查';
+
+
 
 -- 校验是否为合法一代身份证
 CREATE OR REPLACE FUNCTION sfz_valid_v1(id TEXT) RETURNS BOOLEAN RETURNS NULL ON NULL INPUT
@@ -113,7 +125,9 @@ END;
 $$ LANGUAGE PlPgSQL IMMUTABLE;
 COMMENT ON FUNCTION sfz_valid_v1(id text) IS '检查是否为合法15位一代身份证号：长度，日期。地区码暂不检查';
 
--- 创建一个一代身份证
+
+
+-- 创建一个二代身份证
 CREATE OR REPLACE FUNCTION sfz_new(adcode INTEGER, birthday DATE, seq INTEGER) RETURNS VARCHAR(18) RETURNS NULL ON NULL INPUT
 AS $$
 DECLARE
@@ -122,7 +136,9 @@ BEGIN
     RETURN (SELECT id17 || sfz_calculate_checksum(id17));
 END;
 $$ LANGUAGE PlPgSQL IMMUTABLE;
-COMMENT ON FUNCTION sfz_new(INTEGER,DATE,INTEGER) IS '使用地区码，生日，序列号创建18位1代身份证';
+COMMENT ON FUNCTION sfz_new(INTEGER,DATE,INTEGER) IS '使用地区码，生日，序列号创建18位二代身份证';
+
+
 
 -- 将一代身份证升级为二代身份证
 CREATE OR REPLACE FUNCTION sfz_upgrade(id TEXT) RETURNS VARCHAR(18) RETURNS NULL ON NULL INPUT
@@ -134,6 +150,8 @@ BEGIN
 END;
 $$ LANGUAGE PlPgSQL IMMUTABLE;
 COMMENT ON FUNCTION sfz_upgrade(id text) IS '将一个合法的15位身份证升级为18位二代身份证';
+
+
 
 -- 生成一个随机的 合规 身份证号
 CREATE OR REPLACE FUNCTION sfz_random() RETURNS VARCHAR(18) RETURNS NULL ON NULL INPUT

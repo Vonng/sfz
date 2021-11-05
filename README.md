@@ -4,6 +4,22 @@
 
 详细内容：[sql/api.sql](sql/api.sql)
 
+```sql
+COMMENT ON FUNCTION sfz_adcode(id text) IS '提取6位地区代码，输入18/15位字符身份证号，返回6位整数区划代码';
+COMMENT ON FUNCTION sfz_birthday(id text) IS '提取8位出生日期，输入18/15位字符身份证号，返回出生日期，非法日期返回空';
+COMMENT ON FUNCTION sfz_sequence(id text) IS '提取3位序列号，输入18/15位字符身份证号，返回3位序列号字符';
+COMMENT ON FUNCTION sfz_is_male(id text) IS '输入18/15位字符身份证号，返回是否代表男性';
+COMMENT ON FUNCTION sfz_is_female(id text) IS '输入18/15位字符身份证号，返回是否代表女性';
+COMMENT ON FUNCTION sfz_checksum(id text) IS '提取身份证末位校验和，15位身份证号返回空';
+COMMENT ON FUNCTION sfz_calculate_checksum(id text) IS '身份证号校验和，输入为17/18位身份证号，计算得到最后一位校验和';
+COMMENT ON FUNCTION sfz_valid_v2(id text) IS '检查是否为合法18位二代身份证号：长度，日期，校验和。地区码暂不检查';
+COMMENT ON FUNCTION sfz_valid_v1(id text) IS '检查是否为合法15位一代身份证号：长度，日期。地区码暂不检查';
+COMMENT ON FUNCTION sfz_new(INTEGER,DATE,INTEGER) IS '使用地区码，生日，序列号创建18位二代身份证';
+COMMENT ON FUNCTION sfz_upgrade(id text) IS '将一个合法的15位身份证升级为18位二代身份证';
+COMMENT ON FUNCTION sfz_new(INTEGER,DATE,INTEGER) IS '生成一个随机的符合语法语义的身份证号';
+
+```
+
 
 ## 身份证ID结构说明
 
